@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.fyp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.fyp"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 33
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -30,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -50,7 +50,12 @@ android {
 }
 
 dependencies {
+     // Check for the latest version
+    implementation("com.google.ar:core:1.42.0")
 
+    implementation ("io.github.sceneview:arsceneview:2.2.1")
+
+    implementation("com.google.ar.sceneform:ux:1.18.1")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.3")
@@ -66,4 +71,5 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation("io.github.sceneview:sceneview:2.2.1")
 }
