@@ -38,7 +38,7 @@ fun cool(){
             childNodes = listOf(
                 ModelNode(
                     modelInstance = modelLoader.createModelInstance(
-                        assetFileLocation = "models/damaged_helmet.glb"
+                        assetFileLocation = "models/4.glb"
                     ),
                     scaleToUnits = 0.5f // Scale the model to fit the screen
                 )

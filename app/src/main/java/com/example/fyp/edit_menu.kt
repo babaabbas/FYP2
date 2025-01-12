@@ -29,7 +29,12 @@ import androidx.compose.ui.unit.sp
 
 @Preview(showBackground = true)
 @Composable
-fun edit_menu(){
+fun coow(){
+    edit_menu(navigateToHome = {})
+}
+
+@Composable
+fun edit_menu(navigateToHome:()->Unit){
     Column(modifier= Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally){
         Button(onClick = { },modifier=Modifier.padding(20.dp), colors= ButtonDefaults.buttonColors(
             containerColor = Color.Green, // Background color
@@ -73,7 +78,7 @@ fun edit_menu(){
 
         }
         Spacer(modifier=Modifier.weight(.1f))
-        Button(onClick = { },modifier=Modifier.padding(20.dp), colors= ButtonDefaults.buttonColors(
+        Button(onClick = { navigateToHome()},modifier=Modifier.padding(20.dp), colors= ButtonDefaults.buttonColors(
             containerColor = Color.Green, // Background color
             contentColor = Color.Black   // Text/icon color
         )){

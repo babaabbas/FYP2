@@ -1,15 +1,20 @@
 package com.example.fyp
 
+import CustomizeSystemBars
+import ImageWidget
 import android.graphics.RenderEffect
 import android.graphics.RuntimeShader
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -17,48 +22,98 @@ import androidx.compose.foundation.layout.Column
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role.Companion.Image
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.fyp.ui.theme.FYPTheme
 import com.example.fyp.ui.theme.font2Family
+import com.google.android.filament.Engine
+import com.google.ar.core.Anchor
+import com.google.ar.core.Config
+import com.google.ar.core.Frame
+import com.google.ar.core.Plane
+import com.google.ar.core.TrackingFailureReason
+import cool2
 import io.github.sceneview.ar.ARScene
+import io.github.sceneview.ar.arcore.createAnchorOrNull
+import io.github.sceneview.ar.arcore.getUpdatedPlanes
+import io.github.sceneview.ar.arcore.isValid
+import io.github.sceneview.ar.getDescription
+import io.github.sceneview.ar.node.AnchorNode
+import io.github.sceneview.ar.rememberARCameraNode
+import io.github.sceneview.loaders.MaterialLoader
+import io.github.sceneview.loaders.ModelLoader
+import io.github.sceneview.node.CubeNode
+import io.github.sceneview.node.ModelNode
+import io.github.sceneview.rememberCollisionSystem
+import io.github.sceneview.rememberEngine
+import io.github.sceneview.rememberMaterialLoader
+import io.github.sceneview.rememberModelLoader
+import io.github.sceneview.rememberNodes
+import io.github.sceneview.rememberOnGestureListener
+import io.github.sceneview.rememberView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.format.TextStyle
 
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
-
-        
-
+        setTheme(R.style.Theme_FYP)
         setContent {
             val scope = rememberCoroutineScope()
             val timeMs = remember { mutableStateOf(0f) }
@@ -72,169 +127,332 @@ class MainActivity : ComponentActivity() {
             }
             FYPTheme {
 
-                ARModelViewer(
-                    modelFilePath = "models/damaged_helmet.glb", modifier = Modifier.fillMaxSize())
+                val modelCounter = remember { mutableStateOf(3) }
+                Box(modifier = Modifier.fillMaxSize()){
+                    myapp()
+
+                }
+
 
         }
         }}}
 
-        @Composable
-        fun a3dviewer(title: String, price: String) {
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+@Composable
+fun a3dviewer(title: String, price: String,navigateToArscreen:()->Unit)
+{
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = title,
+            style = androidx.compose.ui.text.TextStyle(fontSize = 55.sp)
+        )
+        Button(onClick =navigateToArscreen ) {
+            Text("AR")
+        }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp), // Optional padding
+        contentAlignment = Alignment.Center // Centers content within the Box
+    ) {
+
+        // Wrapping cool() in a Box with fixed size and alignment settings
+        Box(
+            modifier = Modifier
+                .width(260.dp) // Set a specific width
+                .height(500.dp), // Set a specific height
+            contentAlignment = Alignment.Center
+        ) {
+            cool() // The 3D model viewer composable
+        }
+
+        // Add other UI elements here as needed
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+        ) {
+
+            // Example button or other UI components
+            Text(
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 30.dp, vertical = 90.dp) ,
+                text = "Price:$price$$",
+                style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp)
+            )
+
+        }
+    }
+
+}
+
+@Composable
+fun Arscreen(path:String){
+    var index=0
+
+    val values = listOf(0, 1, 2, 3, 4)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        // The destroy calls are automatically made when their disposable effect leaves
+        // the composition or its key changes.
+        val engine = rememberEngine()
+        val modelLoader = rememberModelLoader(engine)
+        val materialLoader = rememberMaterialLoader(engine)
+        val cameraNode = rememberARCameraNode(engine)
+        val childNodes = rememberNodes()
+        val view = rememberView(engine)
+        val collisionSystem = rememberCollisionSystem(view)
+
+        var planeRenderer by remember { mutableStateOf(true) }
+
+        var trackingFailureReason by remember {
+            mutableStateOf<TrackingFailureReason?>(null)
+        }
+        var frame by remember { mutableStateOf<Frame?>(null) }
+        ARScene(
+            modifier = Modifier.fillMaxSize(),
+            childNodes = childNodes,
+            engine = engine,
+            view = view,
+            modelLoader = modelLoader,
+            collisionSystem = collisionSystem,
+            sessionConfiguration = { session, config ->
+                config.depthMode =
+                    when (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                        true -> Config.DepthMode.AUTOMATIC
+                        else -> Config.DepthMode.DISABLED
+                    }
+                config.instantPlacementMode = Config.InstantPlacementMode.LOCAL_Y_UP
+                config.lightEstimationMode =
+                    Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            },
+            cameraNode = cameraNode,
+            planeRenderer = planeRenderer,
+            onTrackingFailureChanged = {
+                trackingFailureReason = it
+            },
+            onSessionUpdated = { session, updatedFrame ->
+                frame = updatedFrame
+
+                if (childNodes.isEmpty()) {
+                    updatedFrame.getUpdatedPlanes()
+                        .firstOrNull { it.type == Plane.Type.HORIZONTAL_UPWARD_FACING }
+                        ?.let { it.createAnchorOrNull(it.centerPose) }?.let { anchor ->
+                            childNodes += createAnchorNode(
+                                engine = engine,
+                                modelLoader = modelLoader,
+                                materialLoader = materialLoader,
+                                anchor = anchor,
+                                modelPath = modelPaths[0].path
+                            )
+                        }
+                }
+            },
+            onGestureListener = rememberOnGestureListener(
+                onSingleTapConfirmed = { motionEvent, node ->
+                    if (node == null) {
+                        val hitResults = frame?.hitTest(motionEvent.x, motionEvent.y)
+                        hitResults?.firstOrNull {
+                            it.isValid(
+                                depthPoint = false,
+                                point = false
+                            )
+                        }?.createAnchorOrNull()
+                            ?.let { anchor ->
+                                planeRenderer = false
+                                childNodes -=childNodes
+
+                                childNodes += createAnchorNode(
+                                    engine = engine,
+                                    modelLoader = modelLoader,
+                                    materialLoader = materialLoader,
+                                    anchor = anchor,
+                                    modelPath = modelPaths[values[index]].path
+                                )
+                                index = (index+1) % 5
+                            }
+                    }
+                })
+        )
+
+        Text(
+            modifier = Modifier
+                .systemBarsPadding()
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .padding(top = 16.dp, start = 32.dp, end = 32.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 28.sp,
+            color = Color.White,
+            text = trackingFailureReason?.let {
+                it.getDescription(LocalContext.current)
+            } ?: if (childNodes.isEmpty()) {
+                stringResource(R.string.point_your_phone_down)
+            } else {
+                stringResource(R.string.tap_anywhere_to_add_model)
+            }
+        )
+    }
+
+}
+
+
+@Composable
+fun Home(modifier: Modifier = Modifier,navController: NavController) {
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(25.dp)
+                .background(color = Color.Transparent, shape = RoundedCornerShape(25.dp)),
+            verticalAlignment = Alignment.CenterVertically
+        )
+        {
+            Image(painter = painterResource(id=R.drawable._26), contentDescription = "logo",modifier = Modifier
+                .height(56.dp)
+                .width(58.dp)
+                .padding(vertical = 0.dp).background(color = Color.Transparent, shape = RoundedCornerShape(25.dp)))
+            Text(
+                text = " NUMERA",
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = font2Family,
+                    fontSize = 50.sp
+                )
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Image(
+                painter = painterResource(id = R.drawable.qr_code),
+                contentDescription = "QR_Image",
+                modifier = Modifier
+                    .height(56.dp)
+                    .width(58.dp)
+                    .padding(vertical = 0.dp).clickable { navController.navigate("QRScannerScreen") }
+            )
+
+
+        }
+        Text(
+            text = "Restaurants",
+            modifier=Modifier.padding(horizontal =20.dp, vertical = 0.dp),
+        color = Color.Black,
+        style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
+        )
+
+
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly)
+        {
+
+
+            LazyColumn(modifier = Modifier.fillMaxHeight(0.9f), content ={
+                items(100, itemContent = {
+                    Spacer(modifier=Modifier.height(20.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                        ImageWidget(120,navController, "edit_menu")
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 16.dp) // Add space between Image and Column
+                        ) {
+                            // Add any content inside the Column
+                            Text(
+                                text = "Biryani Zone",
+                                color = Color.Black,
+                                style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text="Rating:4.5",
+                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
+
+                            )
+                            Text(
+                                text="Burgers,Beverages",
+                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+                            )
+                            Text(
+                                text="Yelhanka",
+                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+
+                            )
+                        }
+                    }
+                    Divider(
+                        color = Color.Gray, // Set the color of the line
+                        thickness = 1.dp, // Set the thickness of the line
+                        modifier = Modifier.padding(vertical = 8.dp) // Add spacing around the line
+                    )
+
+                })
+
+            })
+
+
+
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        Row(modifier = Modifier.padding(10.dp)
+            .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly)
+        {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable {}
+                    .padding(6.dp),
             ) {
-                Text(
-                    text = title,
-                    style = androidx.compose.ui.text.TextStyle(fontSize = 55.sp)
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Search",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp), // Optional padding
-                contentAlignment = Alignment.Center // Centers content within the Box
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable {navController.navigate("edit_menu")}
+                    .padding(6.dp),
             ) {
-
-                // Wrapping cool() in a Box with fixed size and alignment settings
-                Box(
-                    modifier = Modifier
-                        .width(260.dp) // Set a specific width
-                        .height(500.dp), // Set a specific height
-                    contentAlignment = Alignment.Center
-                ) {
-                    cool() // The 3D model viewer composable
-                }
-
-                // Add other UI elements here as needed
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                ) {
-
-                    // Example button or other UI components
-                    Text(
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 30.dp, vertical = 90.dp),
-                        text = "Price:$price$$",
-                        style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp)
-                    )
-
-                }
-            }
-
-        }
-
-
-        @Composable
-        fun Home(modifier: Modifier = Modifier) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(25.dp)
-                        .background(color = Color.Transparent, shape = RoundedCornerShape(25.dp)),
-                    verticalAlignment = Alignment.CenterVertically
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Search",
+                    modifier = Modifier.size(30.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-                {
-                    Text(
-                        text = " NUMERA",
-                        style = androidx.compose.ui.text.TextStyle(
-                            fontFamily = font2Family,
-                            fontSize = 60.sp
-                        )
-                    )
-                    Spacer(modifier = Modifier.width(38.dp))
-                    Image(
-                        painter = painterResource(id = R.drawable.qr_code),
-                        contentDescription = "QR_Image",
-                        modifier = Modifier
-                            .height(56.dp)
-                            .width(58.dp)
-                            .padding(vertical = 0.dp)
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Image(
-                        painter = painterResource(id = R.drawable.noti),
-                        contentDescription = "QR_Image",
-                        modifier = Modifier
-                            .height(49.dp)
-                            .width(47.dp)
-                            .padding(horizontal = 2.dp)
-                    )
-
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(25.dp)
-                    .clickable { }
-                    .background(color = Color.Green, shape = RoundedCornerShape(25.dp)),
-                    verticalAlignment = Alignment.CenterVertically)
-                {
-                    Text(
-                        text = "Your Menu's",
-                        modifier = Modifier.padding(20.dp),
-                        style = androidx.compose.ui.text.TextStyle(fontSize = 35.sp)
-                    )
-
-                }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(25.dp)
-                    .clickable { }
-                    .background(color = Color.Green, shape = RoundedCornerShape(25.dp)),
-                    verticalAlignment = Alignment.CenterVertically)
-                {
-                    Text(
-                        text = "All menu's",
-                        modifier = Modifier.padding(20.dp),
-                        style = androidx.compose.ui.text.TextStyle(fontSize = 35.sp)
-                    )
-
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly)
-                {
-                    Image(
-                        painter = painterResource(id = R.drawable.home),
-                        contentDescription = "QR_Image",
-                        modifier = Modifier
-                            .height(56.dp)
-                            .width(58.dp)
-                            .padding(vertical = 0.dp)
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.plus_math),
-                        contentDescription = "QR_Image",
-                        modifier = Modifier
-                            .height(56.dp)
-                            .width(58.dp)
-                            .padding(vertical = 0.dp)
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.account_circle),
-                        contentDescription = "QR_Image",
-                        modifier = Modifier
-                            .height(56.dp)
-                            .width(58.dp)
-                            .padding(vertical = 0.dp)
-                    )
-
-                }
-
-
+            }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable {}
+                    .padding(6.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AccountCircle,
+                    contentDescription = "Search",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer
+                )
             }
 
         }
 
 
+    }
+
+}
 
 @Composable
 fun GreetingPreview() {
@@ -277,8 +495,6 @@ fun GreetingPreview() {
         }
 
     }
-
-
 }
 @Composable
 fun widget1(name:String){
@@ -310,4 +526,47 @@ fun RoundedCornerWidget(inputText: String) {
             textAlign = TextAlign.Center // Center align the text
         )
     }
+
+}
+
+@Composable
+fun myapp(){
+    val navController= rememberNavController()
+    NavHost(navController=navController, startDestination = "Home"){
+        composable("Home"){
+            Home(navController=navController)
+
+        }
+
+        composable("edit_menu") {
+            edit_menu {
+                navController.navigate("QRCodeGeneratorScreen")
+            }
+        }
+        composable("a3dviewer") {
+            a3dviewer("product1","20") {
+                navController.navigate("Arscreen")
+
+            }
+        }
+        composable("Arscreen") {
+            Arscreen("cool")
+        }
+        composable("QRScannerScreen") {
+            QRScannerScreen() {
+                navController.navigate("a3dviewer")
+            }
+        }
+        composable("QRCodeGeneratorScreen") {
+            QRCodeGeneratorScreen()
+
+        }
+
+    }
+
+}
+@Preview(showBackground = true)
+@Composable
+fun coolw(){
+    Home(navController = rememberNavController() )
 }
