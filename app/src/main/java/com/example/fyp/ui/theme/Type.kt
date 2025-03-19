@@ -9,6 +9,9 @@ import androidx.compose.ui.text.font.Font
 val font2Family = FontFamily(
     Font(R.font.instru)
 )
+val font3Family=FontFamily(
+    Font(R.font.dancing)
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(

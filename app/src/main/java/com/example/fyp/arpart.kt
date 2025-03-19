@@ -10,7 +10,7 @@ import io.github.sceneview.node.CubeNode
 import io.github.sceneview.node.ModelNode
 
 
-private const val kModelFile = "models/4.glb"
+private const val kModelFile = "models/1.glb"
 
 fun createAnchorNode(
     engine: Engine,

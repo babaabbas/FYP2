@@ -14,11 +14,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,26 +28,45 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +76,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -66,25 +89,39 @@ import androidx.compose.ui.res.painterResource
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role.Companion.Image
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.fyp.ui.theme.BlueEnd
+import com.example.fyp.ui.theme.BlueStart
 import com.example.fyp.ui.theme.FYPTheme
+import com.example.fyp.ui.theme.GreenEnd
+import com.example.fyp.ui.theme.GreenStart
+import com.example.fyp.ui.theme.OrangeEnd
+import com.example.fyp.ui.theme.OrangeStart
+import com.example.fyp.ui.theme.PurpleEnd
+import com.example.fyp.ui.theme.PurpleStart
 import com.example.fyp.ui.theme.font2Family
+import com.example.fyp.ui.theme.font3Family
 import com.google.android.filament.Engine
 import com.google.ar.core.Anchor
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.Plane
 import com.google.ar.core.TrackingFailureReason
-import cool2
+import rainbowWidget
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.arcore.createAnchorOrNull
 import io.github.sceneview.ar.arcore.getUpdatedPlanes
@@ -107,8 +144,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.format.TextStyle
 
+data class FoodCategory(
+    val color1: Color,
+    val color2: Color,
+    val category: String,
+    val path:Int
+)
 
-
+@ExperimentalMaterial3Api
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -168,7 +211,7 @@ fun a3dviewer(title: String, price: String,navigateToArscreen:()->Unit)
                 .height(500.dp), // Set a specific height
             contentAlignment = Alignment.Center
         ) {
-            cool() // The 3D model viewer composable
+            cool("models/6.glb") // The 3D model viewer composable
         }
 
         // Add other UI elements here as needed
@@ -310,89 +353,62 @@ fun Home(modifier: Modifier = Modifier,navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(25.dp)
+                .padding(5.dp)
                 .background(color = Color.Transparent, shape = RoundedCornerShape(25.dp)),
             verticalAlignment = Alignment.CenterVertically
         )
         {
-            Image(painter = painterResource(id=R.drawable._26), contentDescription = "logo",modifier = Modifier
-                .height(56.dp)
-                .width(58.dp)
-                .padding(vertical = 0.dp).background(color = Color.Transparent, shape = RoundedCornerShape(25.dp)))
+
             Text(
                 text = " NUMERA",
                 style = androidx.compose.ui.text.TextStyle(
                     fontFamily = font2Family,
-                    fontSize = 50.sp
+                    fontSize = 45.sp
                 )
             )
             Spacer(modifier = Modifier.weight(1f))
-            Image(
-                painter = painterResource(id = R.drawable.qr_code),
-                contentDescription = "QR_Image",
-                modifier = Modifier
-                    .height(56.dp)
-                    .width(58.dp)
-                    .padding(vertical = 0.dp).clickable { navController.navigate("QRScannerScreen") }
+            Icon(
+                imageVector = Icons.Rounded.AccountCircle,
+                contentDescription = "Search",
+                modifier = Modifier.size(50.dp).clickable { navController.navigate("account") },
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
 
 
         }
-        Text(
-            text = "Restaurants",
-            modifier=Modifier.padding(horizontal =20.dp, vertical = 0.dp),
-        color = Color.Black,
-        style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
-        )
+
 
 
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
+            .padding(0.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly)
         {
+            val scrollstate= rememberScrollState()
+            val viewModel:CategoryViewModel= viewModel()
 
 
-            LazyColumn(modifier = Modifier.fillMaxHeight(0.9f), content ={
-                items(100, itemContent = {
-                    Spacer(modifier=Modifier.height(20.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        ImageWidget(120,navController, "edit_menu")
-                        Column(
-                            modifier = Modifier
-                                .padding(start = 16.dp) // Add space between Image and Column
-                        ) {
-                            // Add any content inside the Column
-                            Text(
-                                text = "Biryani Zone",
-                                color = Color.Black,
-                                style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
-                            )
-                            Text(
-                                text="Rating:4.5",
-                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
 
-                            )
-                            Text(
-                                text="Burgers,Beverages",
-                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
-                            )
-                            Text(
-                                text="Yelhanka",
-                                style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+                val foodCategoryList by viewModel.categories.collectAsState()
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2), // 2 columns in the grid
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
 
-                            )
-                        }
+                    itemsIndexed(foodCategoryList) {index, item ->
+                        rainbowWidget(Color.White, Color.White,item.cat_name,navController,R.drawable.beans,item)
+
                     }
-                    Divider(
-                        color = Color.Gray, // Set the color of the line
-                        thickness = 1.dp, // Set the thickness of the line
-                        modifier = Modifier.padding(vertical = 8.dp) // Add spacing around the line
-                    )
 
-                })
+                }
 
-            })
+
+
+
+
+
 
 
 
@@ -475,7 +491,7 @@ fun GreetingPreview() {
                         .height(500.dp), // Set a specific height
                     contentAlignment = Alignment.Center
                 ) {
-                    cool() // The 3D model viewer composable
+                    cool("models/6.glb") // The 3D model viewer composable
                 }
 
                 // Add other UI elements here as needed
@@ -528,7 +544,7 @@ fun RoundedCornerWidget(inputText: String) {
     }
 
 }
-
+@ExperimentalMaterial3Api
 @Composable
 fun myapp(){
     val navController= rememberNavController()
@@ -537,7 +553,9 @@ fun myapp(){
             Home(navController=navController)
 
         }
-
+        composable("account") {
+            account()
+        }
         composable("edit_menu") {
             edit_menu {
                 navController.navigate("QRCodeGeneratorScreen")
@@ -546,7 +564,6 @@ fun myapp(){
         composable("a3dviewer") {
             a3dviewer("product1","20") {
                 navController.navigate("Arscreen")
-
             }
         }
         composable("Arscreen") {
@@ -561,6 +578,22 @@ fun myapp(){
             QRCodeGeneratorScreen()
 
         }
+        composable(
+            "food/{catName}/{id}/{photo}",
+            arguments = listOf(
+                navArgument("catName") { type = NavType.StringType },
+                navArgument("id") { type = NavType.StringType },
+                navArgument("photo") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val catName = backStackEntry.arguments?.getString("catName") ?: ""
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            val photo = backStackEntry.arguments?.getString("photo") ?: ""
+
+            val category = Category(cat_name = catName, id_ = id, photo_ = photo)
+
+            scaff2(navController, category)
+        }
 
     }
 
@@ -569,4 +602,204 @@ fun myapp(){
 @Composable
 fun coolw(){
     Home(navController = rememberNavController() )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+fun scaff2(navController: NavController,category: Category){
+    val itemnumber = remember { mutableIntStateOf(0) }
+    var aror3d by remember { mutableIntStateOf(1) }
+    val isSheetVisible = remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
+    var number  by remember { mutableIntStateOf(0) }
+    var isDialogVisible by remember { mutableStateOf(false) }
+
+    val scrollBehavior= TopAppBarDefaults.enterAlwaysScrollBehavior(
+        state = rememberTopAppBarState()
+    )
+    val viewModel:foodItemViewModel= viewModel()
+    val foodItems by viewModel.foodItems.collectAsState()
+    val filtereditems=foodItems.filter { it.category_id==category.id_ }
+    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            topbar(Modifier,scrollBehavior)
+        },
+        floatingActionButton = {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)  // Size of the circle
+                    .background(GreenStart, shape = CircleShape)  // Circle background color
+                    .padding(16.dp).clickable { navController.navigate("edit_menu") },  // Padding for the icon inside the circle
+                contentAlignment = Alignment.Center
+            ){
+                Icon(imageVector = Icons.Rounded.Add,
+                contentDescription = null,
+                modifier =Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(10.dp)) )}
+
+        },
+        floatingActionButtonPosition = FabPosition.End
+
+    ) {
+            paddingValues ->
+        LazyColumn(modifier = Modifier.fillMaxHeight(0.96f), contentPadding = PaddingValues(top=paddingValues.calculateTopPadding())){
+            itemsIndexed(filtereditems){ index,foodItem->
+
+                Spacer(modifier=Modifier.height(20.dp))
+                Row(modifier = Modifier.fillMaxWidth().padding(16.dp).clickable {
+                    coroutineScope.launch { isSheetVisible.value = true
+                        itemnumber.intValue=index}
+                    number=1
+                }, horizontalArrangement = Arrangement.Start) {
+                    ImageWidget(90,navController, "edit_menu",R.drawable.beans)
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp) // Add space between Image and Column
+                    ) {
+                        // Add any content inside the Column
+                        Text(
+                            text = foodItem.food_name,
+
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Text(
+                            text="Rating:${foodItem.rating}",
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
+
+                        )
+                        Text(
+                            text="Price:Rs.${foodItem.calories}",
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+                        )
+                        var op:String
+                        if(foodItem.isVeg){
+                            op="Veg"
+                        }
+                        else{
+                            op="non-veg"
+                        }
+                        Text(
+                            text=op,
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+
+                        )
+                    }
+                }
+                Divider(
+                    color = MaterialTheme.colorScheme.errorContainer, // Set the color of the line
+                    thickness = 1.dp, // Set the thickness of the line
+                    modifier = Modifier.padding(vertical = 8.dp) // Add spacing around the line
+                )
+
+            }
+
+        }
+
+
+    }
+    if (isSheetVisible.value) {
+        var item:FoodItem=foodItems[itemnumber.value]
+        ModalBottomSheet(
+            onDismissRequest = { isSheetVisible.value = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()), // Added scrollable functionality
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row {
+                    ImageWidget(150,navController, "edit_menu",R.drawable.beans)
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp) // Add space between Image and Column
+                    ) {
+                        // Add any content inside the Column
+                        Text(
+                            text = item.food_name,
+
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                        )
+                        Text(
+                            text="Rating:${item.rating}",
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
+
+                        )
+                        Text(
+                            text="Price:Rs.${item.calories}",
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+                        )
+                        var op:String
+                        if(item.isVeg){
+                            op="Veg"
+                        }
+                        else{
+                            op="non-veg"
+                        }
+                        Text(
+                            text=op,
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Thin)
+
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+
+                            Icon(
+                                painter = painterResource(R.drawable.icon3d) , // Placeholder for AR/3D Icon
+                                contentDescription = "See in 3D",
+                                modifier = Modifier.size(40.dp).clickable { aror3d=1
+                                    isDialogVisible = true},
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.iconar), // Placeholder for AR/3D Icon
+                                contentDescription = "See in ar",
+                                modifier = Modifier.size(40.dp).clickable { navController.navigate("Arscreen")
+                                },
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+
+
+                        }
+                    }
+                }
+
+
+                // 3D Food View (Icon for AR/3D viewing)
+
+            }
+        }
+    }
+    if (isDialogVisible) {
+        Dialog(onDismissRequest = { isDialogVisible = false
+        }) {
+            Box(
+                modifier = Modifier
+                    .size(400.dp, 700.dp) // Size of the dialog box
+                    .clip(RoundedCornerShape(16.dp)) // Rounded corners
+                    .background(Color.White) // Background color
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if(aror3d==1){
+                    cool("models/7.glb")
+                }
+                else{
+                    Arscreen("ol")
+                }
+
+            }
+        }
+    }
+
 }

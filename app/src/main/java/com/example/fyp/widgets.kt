@@ -32,10 +32,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.fyp.Category
 import com.example.fyp.R
 import com.example.fyp.cool
+import com.example.fyp.ui.theme.GreenEnd
+import com.example.fyp.ui.theme.GreenStart
 import com.example.fyp.ui.theme.PurpleEnd
 import com.example.fyp.ui.theme.PurpleStart
+import com.example.fyp.ui.theme.font3Family
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -63,7 +68,7 @@ val cards = listOf(
         cardNumber = "3664 7865",
         cardName = "Naruto Uzamaki",
         rating = 0.2,
-        color = getGradient(Color.White, Color.White),
+        color = getGradient(PurpleStart, PurpleEnd),
     ))
 fun getGradient(
     startColor: Color,
@@ -108,13 +113,13 @@ fun ImageWidget2(size:Int=200) {
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                cool()
+                cool("models/6.glb")
             }
         }
     }
 }
 @Composable
-fun ImageWidget(size:Int, navController: NavController, destination: String) {
+fun ImageWidget(size:Int, navController: NavController, destination: String,path:Int) {
     Column(
         modifier = Modifier
             .background(Color.White)
@@ -123,51 +128,58 @@ fun ImageWidget(size:Int, navController: NavController, destination: String) {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.butterfly),
+            painter = painterResource(id=path),
             contentDescription = "Centered Image",
             modifier = Modifier
                 .size(size.dp) // Adjust size of the image
                 .shadow(10.dp,shape = RoundedCornerShape(25.dp)
                 )
-                .background(Color.Blue, shape = RoundedCornerShape(16.dp))
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
             ,contentScale = ContentScale.Crop// Background for the image
         )
     }
 }
-@Preview(showBackground = true)
+
 @Composable
-fun cool2(){
-    val card=cards[0]
-    var image = painterResource(id = R.drawable.butterfly)
+fun rainbowWidget(color1:Color,color2:Color,text:String,navController: NavController,path:Int,category: Category){
     var lastItemPaddingEnd = 16.dp
     Box(
         modifier = Modifier
-            .padding(start = 16.dp, end = lastItemPaddingEnd)
-            .shadow(
-                elevation = 10.dp, // Shadow elevation
-                shape = RoundedCornerShape(25.dp), // Shape of the shadow
-                clip = false // Whether to clip content to the shape
-            )
-    ) {
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(25.dp))
-                .background(card.color)
-                .width(130.dp)
-                .height(110.dp)
-                .clickable {}
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+            .padding(start = 16.dp, end = lastItemPaddingEnd).clickable {
+                navController.navigate("food/${category.cat_name}/${category.id_}/${category.photo_}")}
+                    .shadow(
+                        elevation = 2.dp, // Shadow elevation
+                        shape = RoundedCornerShape(25.dp), // Shape of the shadow
+                        clip = false // Whether to clip content to the shape
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(25.dp))
+                            .height(150.dp)
+                            .width(150.dp)
+                            .background(getGradient(color1, color2))
+                            .padding(vertical = 12.dp, horizontal = 16.dp),
+                        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id=path),
+                            contentDescription = "Centered Image",
+                            modifier = Modifier
+                                .size(100.dp) // Adjust size of the image
+                            ,contentScale = ContentScale.Crop// Background for the image
+                        )
+                        Text(
+                            text = text,
+                            modifier=Modifier.padding(horizontal =20.dp, vertical = 0.dp),
+                            fontFamily = font3Family,
+                            fontSize = 20.sp,
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 25.sp, fontWeight = FontWeight.Bold)
+                        )
 
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
 
-            Image(
-                painter = image,
-                contentDescription = card.cardName,
-                modifier = Modifier.width(60.dp),
-                        contentScale = ContentScale.Crop,
-            )
-        }
-    }
+                    }
+                }
+            }
 
-}
+

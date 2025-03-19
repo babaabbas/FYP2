@@ -14,15 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import cool2
-
 @Preview
 @Composable
 fun normal(){
     var state= rememberScrollState()
     Column(modifier = Modifier.verticalScroll(state)) {
         for(i in 1 .. 20){
-            cool2()
+
             Spacer(modifier = Modifier.height(20.dp))
         }
     }
@@ -34,8 +32,7 @@ fun demo(){
     LazyColumn(content ={
          items(100, itemContent = {
              Row {
-                 cool2()
-                 cool2()
+
              }
              Spacer(modifier=Modifier.height(20.dp))
          })

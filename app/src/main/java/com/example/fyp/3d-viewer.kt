@@ -16,7 +16,7 @@ import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberModelLoader
 
 @Composable
-fun cool(){
+fun cool(assetloc:String){
     Box(modifier = Modifier.fillMaxSize()) {
         // Initializing Sceneview engine and loaders
         val engine = rememberEngine()
@@ -38,7 +38,7 @@ fun cool(){
             childNodes = listOf(
                 ModelNode(
                     modelInstance = modelLoader.createModelInstance(
-                        assetFileLocation = "models/4.glb"
+                        assetFileLocation = assetloc
                     ),
                     scaleToUnits = 0.5f // Scale the model to fit the screen
                 )
