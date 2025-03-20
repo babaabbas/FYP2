@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-03-17T18:26:02.123649Z">
+        <DropdownSelection timestamp="2025-03-19T07:05:06.634303Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=WS4LGA8X75FQPJ5P" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/abbasbaba/.android/avd/Pixel_3a_API_34_extension_level_7_arm64-v8a.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -24,9 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="cool2">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="jfp">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -42,6 +39,9 @@
         <DialogSelection />
       </SelectionState>
       <SelectionState runConfigName="coo2l">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="ModelScreen">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

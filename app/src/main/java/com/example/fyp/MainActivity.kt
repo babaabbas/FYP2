@@ -2,6 +2,7 @@ package com.example.fyp
 
 import CustomizeSystemBars
 import ImageWidget
+import ModelScreen
 import android.graphics.RenderEffect
 import android.graphics.RuntimeShader
 import android.os.Bundle
@@ -360,7 +361,7 @@ fun Home(modifier: Modifier = Modifier,navController: NavController) {
         {
 
             Text(
-                text = " NUMERA",
+                text = "     NUMERA",
                 style = androidx.compose.ui.text.TextStyle(
                     fontFamily = font2Family,
                     fontSize = 45.sp
@@ -607,6 +608,8 @@ fun coolw(){
 @ExperimentalMaterial3Api
 @Composable
 fun scaff2(navController: NavController,category: Category){
+    var searchQuery by remember { mutableStateOf("") }
+
     val itemnumber = remember { mutableIntStateOf(0) }
     var aror3d by remember { mutableIntStateOf(1) }
     val isSheetVisible = remember { mutableStateOf(false) }
@@ -621,31 +624,22 @@ fun scaff2(navController: NavController,category: Category){
     val viewModel:foodItemViewModel= viewModel()
     val foodItems by viewModel.foodItems.collectAsState()
     val filtereditems=foodItems.filter { it.category_id==category.id_ }
+    val doublefiltered=filtereditems.filter {
+        it.food_name.contains(searchQuery, ignoreCase = true)}
     Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            topbar(Modifier,scrollBehavior)
+            topbar(
+                scrollBehaviour = scrollBehavior,
+                searchQuery = searchQuery,
+                onSearchQueryChanged = { searchQuery = it }
+            )
         },
-        floatingActionButton = {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)  // Size of the circle
-                    .background(GreenStart, shape = CircleShape)  // Circle background color
-                    .padding(16.dp).clickable { navController.navigate("edit_menu") },  // Padding for the icon inside the circle
-                contentAlignment = Alignment.Center
-            ){
-                Icon(imageVector = Icons.Rounded.Add,
-                contentDescription = null,
-                modifier =Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(10.dp)) )}
 
-        },
-        floatingActionButtonPosition = FabPosition.End
 
     ) {
             paddingValues ->
         LazyColumn(modifier = Modifier.fillMaxHeight(0.96f), contentPadding = PaddingValues(top=paddingValues.calculateTopPadding())){
-            itemsIndexed(filtereditems){ index,foodItem->
+            itemsIndexed(doublefiltered){ index,foodItem->
 
                 Spacer(modifier=Modifier.height(20.dp))
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp).clickable {
@@ -792,7 +786,7 @@ fun scaff2(navController: NavController,category: Category){
                 contentAlignment = Alignment.Center
             ) {
                 if(aror3d==1){
-                    cool("models/7.glb")
+                    ModelScreen("models/7.glb")
                 }
                 else{
                     Arscreen("ol")

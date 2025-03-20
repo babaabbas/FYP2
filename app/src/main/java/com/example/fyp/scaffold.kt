@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -81,7 +83,7 @@ fun scaff(navController: NavController){
     )
     Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            topbar(Modifier,scrollBehavior)
+
         }
     ) {
         paddingValues ->
@@ -257,16 +259,42 @@ fun scaff(navController: NavController){
     }
 
 }
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun topbar(modifier: Modifier=Modifier,scrollBehaviour:TopAppBarScrollBehavior){
-    TopAppBar(modifier = modifier.padding(16.dp).clip(RoundedCornerShape(100.dp)), scrollBehavior = scrollBehaviour,
+fun topbar(
+    modifier: Modifier = Modifier,
+    scrollBehaviour: TopAppBarScrollBehavior,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit
+) {
+    TopAppBar(
+        modifier = modifier
+            .padding(16.dp)
+            .clip(RoundedCornerShape(100.dp)),
+        scrollBehavior = scrollBehaviour,
         navigationIcon = {
-            Icon(imageVector = Icons.Rounded.Search, contentDescription = null,modifier=Modifier.padding(start = 16.dp, end = 8.dp).size(26.dp))
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 8.dp)
+                    .size(26.dp)
+            )
         },
-
-         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), title = {
-            Text("Search Food Items", fontSize = 16.sp)
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        title = {
+            TextField(
+                value = searchQuery,
+                onValueChange = { onSearchQueryChanged(it) },
+                placeholder = { Text("Search Food Items") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                )
+            )
         }
     )
 }
